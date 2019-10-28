@@ -12,7 +12,7 @@ test/*
 configs/*
 venv/*
 prototypes/.ipynb_checkpoints/*
-.ipynb_checkpoints/*
+prototypes/.ipynb_checkpoints/*
 **/.ipynb_checkpoints
 saves/*
 config.py
