@@ -1,6 +1,8 @@
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
+from torch.utils.tensorboard import SummaryWriter
 
 
 class Trainer(object):
@@ -8,6 +10,11 @@ class Trainer(object):
         self.batch_size = batch_size
         self.dataloader = dataloader
         self.network = network
+        self.writer = SummaryWriter('results/network_0')
+
+        input_example = next(iter(dataloader))['uv']
+        self.writer.add_graph(self.network, input_example)
+        self.writer.close()
 
     def train(self, epochs):
         criterion = nn.MSELoss()
@@ -28,7 +35,8 @@ class Trainer(object):
 
                 running_loss += loss.item()
 
-                if i % 100 == 99:
-                    print("i: {}; loss: {}".format(i, running_loss / 100))
+                if i % 1000 == 999:
+                    self.writer.add_scalar('training loss',
+                                      running_loss / 1000,
+                                      epoch * len(self.dataloader) + i)
                     running_loss = 0.0
-

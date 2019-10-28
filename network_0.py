@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -28,7 +29,7 @@ class Network0(nn.Module):
         x = F.relu(self.fc8(x))
         x = F.relu(self.fc9(x))
         x = F.relu(self.fc10(x))
-        x = F.tanh(self.fc11(x))
+        x = torch.tanh(self.fc11(x))
         return x
 
 
