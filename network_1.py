@@ -3,9 +3,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-class Network0(nn.Module):
+class Network1(nn.Module):
     def __init__(self):
-        super(Network0, self).__init__()
+        super(Network1, self).__init__()
         self.fc1 = nn.Linear(42, 64)
         self.fc2 = nn.Linear(64, 64)
         self.fc3 = nn.Linear(64, 64)
@@ -20,8 +20,18 @@ class Network0(nn.Module):
         self.fc12 = nn.Linear(1024, 2048)
         self.fc13 = nn.Linear(2048, 2048)
         self.fc14 = nn.Linear(2048, 2048)
-        self.fc15 = nn.Linear(2048, 1024)
-        self.fc16 = nn.Linear(1024, 58)
+        self.fc15 = nn.Linear(2048, 2048)
+        self.fc16 = nn.Linear(2048, 4096)
+        self.fc17 = nn.Linear(4096, 4096)
+        self.fc18 = nn.Linear(4096, 4096)
+        self.fc19 = nn.Linear(4096, 4096)
+        self.fc20 = nn.Linear(4096, 4096)
+        self.fc21 = nn.Linear(4096, 2048)
+        self.fc22 = nn.Linear(2048, 2048)
+        self.fc23 = nn.Linear(2048, 2048)
+        self.fc24 = nn.Linear(2048, 1024)
+        self.fc25 = nn.Linear(1024, 1024)
+        self.fc26 = nn.Linear(1024, 58)
 
     def forward(self, x):
         x = F.relu(self.fc1(x))
@@ -39,8 +49,15 @@ class Network0(nn.Module):
         x = F.relu(self.fc13(x))
         x = F.relu(self.fc14(x))
         x = F.relu(self.fc15(x))
-        x = self.fc16(x)
+        x = F.relu(self.fc16(x))
+        x = F.relu(self.fc17(x))
+        x = F.relu(self.fc18(x))
+        x = F.relu(self.fc19(x))
+        x = F.relu(self.fc20(x))
+        x = F.relu(self.fc21(x))
+        x = F.relu(self.fc22(x))
+        x = F.relu(self.fc23(x))
+        x = F.relu(self.fc24(x))
+        x = F.relu(self.fc25(x))
+        x = torch.tanh(self.fc26(x))
         return x
-
-
-net = Network0()

@@ -13,7 +13,7 @@ class Trainer(object):
         self.model = model
         self.save_path = save_path
 
-        self.writer = SummaryWriter('results/network_0')
+        self.writer = SummaryWriter('results/network_1')
         input_example = next(iter(dataloader))['uv']
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -41,7 +41,7 @@ class Trainer(object):
                 self.optimizer.zero_grad()
 
                 outputs = self.model(uv)
-                loss = self.criterion(outputs, mano)
+                loss = self.criterion(outputs*3.12, mano)
                 loss.backward()
                 self.optimizer.step()
 

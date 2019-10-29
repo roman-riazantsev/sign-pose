@@ -2,7 +2,7 @@ from torch.utils.data import DataLoader
 import torch
 from config import CONFIG
 from frei_dataset import FreiDataset
-from network_0 import Network0
+from network_1 import Network1
 from trainer import Trainer
 from utils import ToTensor
 
@@ -18,6 +18,6 @@ if __name__ == '__main__':
         # num_workers=4
     )
 
-    model = Network0()
-    trainer = Trainer(CONFIG['batch_size'], dataloader, model, 'results/network_0.pt')
+    model = Network1()
+    trainer = Trainer(CONFIG['batch_size'], dataloader, model, 'results/network_1.pt')
     trainer.train(epochs=1000, save_rate=100)
