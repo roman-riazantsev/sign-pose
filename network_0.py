@@ -16,7 +16,12 @@ class Network0(nn.Module):
         self.fc8 = nn.Linear(256, 512)
         self.fc9 = nn.Linear(512, 512)
         self.fc10 = nn.Linear(512, 1024)
-        self.fc11 = nn.Linear(1024, 58)
+        self.fc11 = nn.Linear(1024, 1024)
+        self.fc12 = nn.Linear(1024, 2048)
+        self.fc13 = nn.Linear(2048, 2048)
+        self.fc14 = nn.Linear(2048, 2048)
+        self.fc15 = nn.Linear(2048, 1024)
+        self.fc16 = nn.Linear(1024, 58)
 
     def forward(self, x):
         x = F.relu(self.fc1(x))
@@ -29,7 +34,12 @@ class Network0(nn.Module):
         x = F.relu(self.fc8(x))
         x = F.relu(self.fc9(x))
         x = F.relu(self.fc10(x))
-        x = torch.tanh(self.fc11(x))
+        x = F.relu(self.fc11(x))
+        x = F.relu(self.fc12(x))
+        x = F.relu(self.fc13(x))
+        x = F.relu(self.fc14(x))
+        x = F.relu(self.fc15(x))
+        x = self.fc16(x)
         return x
 
 
