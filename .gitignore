@@ -16,4 +16,5 @@ prototypes/.ipynb_checkpoints/*
 **/.ipynb_checkpoints
 saves/*
 config.py
+mano/*
 

@@ -4,6 +4,7 @@ import os
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.tensorboard import SummaryWriter
+from manopth.manolayer import ManoLayer
 
 
 class Trainer(object):
@@ -13,7 +14,7 @@ class Trainer(object):
         self.model = model
         self.save_path = save_path
 
-        self.writer = SummaryWriter('results/network_1')
+        self.writer = SummaryWriter('results/network_5')
         input_example = next(iter(dataloader))['uv']
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -27,21 +28,46 @@ class Trainer(object):
 
         self.load_state()
 
+        ncomps = 45
+        self.mano_layer = ManoLayer(
+            mano_root='mano/models', use_pca=False, ncomps=ncomps, flat_hand_mean=False)
+
+        self.mano_layer.to(self.device)
+        self.mano_layer.eval()
+
     def train(self, epochs, save_rate):
         self.running_loss = 0.0
 
         for epoch in range(epochs):
             for i, sample in enumerate(self.dataloader, 0):
                 uv = sample['uv']
-                mano = sample['mano']
+                outputs_gt = sample['mano']
 
                 uv = uv.to(self.device)
-                mano = mano.to(self.device)
+                outputs_gt = outputs_gt.to(self.device)
 
                 self.optimizer.zero_grad()
 
-                outputs = self.model(uv)
-                loss = self.criterion(outputs*3.12, mano)
+                outputs = self.model(uv) * 3.12
+
+                # losses = []
+                # losses.append(self.criterion(outputs, outputs_gt))
+
+                loss = self.criterion(outputs, outputs_gt)
+
+                # poses_pred = outputs[:, :48]  # .unsqueeze(0)
+                # shapes_pred = outputs[:, 48:]  # .unsqueeze(0)
+                # hand_verts_p, hand_joints_p = self.mano_layer(poses_pred, shapes_pred)
+                #
+                # poses_gt = outputs_gt[:, :48]
+                # shapes_gt = outputs_gt[:, 48:]
+                # hand_verts_gt, hand_joints_gt = self.mano_layer(poses_gt, shapes_gt)
+
+                # losses.append(self.criterion(hand_verts_p, hand_verts_gt))
+                # losses.append(self.criterion(hand_joints_p, hand_joints_gt))
+
+                # loss = sum(losses)
+
                 loss.backward()
                 self.optimizer.step()
 

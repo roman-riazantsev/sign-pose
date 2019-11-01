@@ -19,5 +19,5 @@ if __name__ == '__main__':
     )
 
     model = Network1()
-    trainer = Trainer(CONFIG['batch_size'], dataloader, model, 'results/network_1.pt')
+    trainer = Trainer(CONFIG['batch_size'], dataloader, model, 'results/network_5.pt')
     trainer.train(epochs=1000, save_rate=100)
