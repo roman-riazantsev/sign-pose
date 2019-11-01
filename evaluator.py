@@ -20,12 +20,13 @@ model.load_state_dict(checkpoint['model_state_dict'])
 model.to(device)
 model.eval()
 
-
 # # max: 3.1128
 # # min: ~ -3.12
 
+
 sample = dataset[1]
 uv = sample['uv']
+print(uv)
 mano_true = sample['mano']
 mano_pred = model(uv) * 3.12
 
