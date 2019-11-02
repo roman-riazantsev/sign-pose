@@ -1,21 +1,22 @@
 import torch
-import torch
 from manopth.manolayer import ManoLayer
 from manopth import demo
 
-from config import CONFIG
-from frei_dataset import FreiDataset
-from network_1 import Network1
-from utils import ToTensor
+from configs.config_p0 import CONFIG_P0
+from datasets.frei_dataset_p0 import FreiDataset
+from models.model_p0 import ModelP0
+from transforms.to_tensor_p0 import ToTensorP0
 
 dataset = FreiDataset(
-    CONFIG['dataset_path'],
-    transform=ToTensor()
+    CONFIG_P0['dataset_path'],
+    transform=ToTensorP0()
 )
 
+build_id = CONFIG_P0['build_id']
+
 device = torch.device("cuda")
-model = Network1()
-checkpoint = torch.load('results/network_5.pt')
+model = ModelP0()
+checkpoint = torch.load(f'results/{build_id}.pt')
 model.load_state_dict(checkpoint['model_state_dict'])
 model.to(device)
 model.eval()

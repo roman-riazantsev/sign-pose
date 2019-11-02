@@ -4,7 +4,6 @@
 *.pyc
 .idea/*
 results/*
-datasets/*
 logs/*
 test_board/*
 test_log/*
@@ -15,7 +14,7 @@ prototypes/.ipynb_checkpoints/*
 prototypes/.ipynb_checkpoints/*
 **/.ipynb_checkpoints
 saves/*
-config.py
+configs/config_p0.py
 mano/*
 mano
 /mano/
