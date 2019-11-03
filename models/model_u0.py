@@ -22,7 +22,7 @@ class ModelU0(nn.Module):
         self.up2 = Up(512, 128, bilinear)
         self.up3 = Up(256, 64, bilinear)
         self.up4 = Up(128, 64, bilinear)
-        self.outc = OutConv(64, 21)
+        self.outc = OutConv(64, 22)
 
     def forward(self, x):
         x1 = self.inc(x)

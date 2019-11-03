@@ -11,7 +11,7 @@ from utils.fh_utils import db_size
 from utils.utils import to_numpy
 
 
-class TrainerU0(object):
+class TrainerM0(object):
     def __init__(self, batch_size, dataloader, model, build_id, save_rate):
         self.batch_size = batch_size
         self.dataloader = dataloader
@@ -22,16 +22,12 @@ class TrainerU0(object):
         self.save_path = f'results/{build_id}.pt'
 
         self.writer = SummaryWriter(f'results/{build_id}')
-        input_example = next(iter(dataloader))['img']
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model.to(self.device)
 
-        self.writer.add_graph(self.model, input_example)
-        self.writer.close()
-
         self.criterion = nn.MSELoss()
-        self.optimizer = optim.Adam(self.model.parameters(), lr=0.0002)
+        self.optimizer = optim.Adam(self.model.parameters(), lr=0.0001)
 
         self.load_state()
 
@@ -40,17 +36,38 @@ class TrainerU0(object):
 
         for epoch in range(epochs):
             for i, sample in enumerate(tqdm(self.dataloader, 0)):
-                x = sample['img']
-                y_2d = sample['y_2d']
+                poses = sample['poses']
+                # print(poses.shape)
+                shapes = sample['shapes']
+
+                mano_layer = ManoLayer(
+                    mano_root='mano/models', use_pca=False, ncomps=48, flat_hand_mean=False)
+
+                mano_layer.to(self.device)
+                # Forward pass through MANO layer
+                _, hand_joints = mano_layer(poses, shapes)
+
+                uv_root = sample['uv_root']
+                scale = sample['scale']
+
+                hand_joints = hand_joints.reshape([self.batch_size, -1])
+                x = torch.cat((hand_joints, uv_root, scale), 1)
+                x = torch.cat((x, x), 1)
+                # print("x", x.shape)
+                y = sample['xyz'].reshape([self.batch_size, -1])
+                # print("y", y.shape)
+
+                # print("uv", uv_root.shape)
+                # print("sc", scale.shape)
 
                 x = x.to(self.device)
-                y_2d = y_2d.to(self.device)
+                y = y.to(self.device)
 
                 self.optimizer.zero_grad()
 
-                y_2d_ = self.model(x)
+                y_ = self.model(x)
 
-                loss = self.criterion(y_2d_, y_2d)
+                loss = self.criterion(y_, y)
 
                 loss.backward()
                 self.optimizer.step()
@@ -64,9 +81,6 @@ class TrainerU0(object):
                     self.writer.add_scalar('training loss',
                                            self.running_loss / self.save_rate,
                                            self.g_step)
-                    self.writer.add_image('predictions vs. actuals',
-                                          self.render_results(y_2d[0], y_2d_[0]),
-                                          global_step=self.g_step)
                     print(self.running_loss / self.save_rate, self.g_step)
                     self.running_loss = 0.0
 
@@ -93,13 +107,3 @@ class TrainerU0(object):
             print(f'File "{self.save_path}" does not exist. Initializing parameters from scratch.')
             self.g_step = 0
             self.running_loss = 0.0
-
-    @staticmethod
-    def render_results(y_2d, y_2d_):
-        y_2d = to_numpy(y_2d)
-        y_2d_ = to_numpy(y_2d_)
-        point_pairs = np.column_stack((y_2d, y_2d_))
-        im_to_show = point_pairs[1::4]
-        res = np.concatenate(im_to_show, axis=1)
-        res = np.expand_dims(res, axis=0)
-        return res

@@ -187,7 +187,9 @@ def read_img(idx, base_path, set_name, version=None):
     img_rgb_path = os.path.join(base_path, set_name, 'rgb',
                                 '%08d.jpg' % sample_version.map_id(idx, version))
     _assert_exist(img_rgb_path)
-    return io.imread(img_rgb_path)
+    img = io.imread(img_rgb_path)
+    img = img / 255.
+    return img
 
 
 def read_msk(idx, base_path):
@@ -195,7 +197,7 @@ def read_msk(idx, base_path):
                              '%08d.jpg' % idx)
     _assert_exist(mask_path)
     msk = cv2.imread(mask_path, False)
-      # = cv2.fastNlMeansDenoisingColored(msk, None, 10, 10, 7, 21)
+    # = cv2.fastNlMeansDenoisingColored(msk, None, 10, 10, 7, 21)
     msk = cv2.fastNlMeansDenoising(msk)
     return msk
 

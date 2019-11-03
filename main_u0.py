@@ -22,4 +22,4 @@ if __name__ == '__main__':
     )
     model = ModelU0()
     trainer = TrainerU0(CONFIG_U0['batch_size'], dataloader, model, build_id, CONFIG_U0['save_rate'])
-    trainer.train(epochs=1000)
+    trainer.train(epochs=10000)
