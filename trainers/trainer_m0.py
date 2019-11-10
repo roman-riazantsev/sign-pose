@@ -37,7 +37,6 @@ class TrainerM0(object):
         for epoch in range(epochs):
             for i, sample in enumerate(tqdm(self.dataloader, 0)):
                 poses = sample['poses']
-                # print(poses.shape)
                 shapes = sample['shapes']
 
                 mano_layer = ManoLayer(

@@ -9,6 +9,31 @@ def to_numpy(tensor):
     return tensor.detach().numpy()
 
 
+def get_focal_pp(K):
+    """ Extract the camera parameters that are relevant for an orthographic assumption. """
+    focal = 0.5 * (K[0, 0] + K[1, 1])
+    pp = K[:2, 2]
+    return focal, pp
+
+
+def backproject_ortho(uv, scale,  # kind of the predictions
+                      focal, pp):  # kind of the camera calibration
+    """ Calculate 3D coordinates from 2D coordinates and the camera parameters. """
+    uv = uv.copy()
+    uv -= pp
+    xyz = np.concatenate([np.reshape(uv, [-1, 2]),
+                          np.ones_like(uv[:, :1]) * focal], 1)
+    xyz /= scale
+    return xyz
+
+
+def recover_root(uv_root, scale,
+                 focal, pp):
+    uv_root = np.reshape(uv_root, [1, 2])
+    xyz_root = backproject_ortho(uv_root, scale, focal, pp)
+    return xyz_root
+
+
 def plot_hand(axis, coords_hw, vis=None, color_fixed=None, linewidth='1', order='hw', draw_kp=True):
     """ Plots a hand stick figure into a matplotlib figure. """
     if order == 'uv':
