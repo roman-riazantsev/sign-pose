@@ -18,3 +18,4 @@ configs/config_p0.py
 mano/*
 mano
 /mano/
+**/*.pt
