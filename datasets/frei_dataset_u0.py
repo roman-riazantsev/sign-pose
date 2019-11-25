@@ -9,8 +9,6 @@ from utils.fh_utils import load_db_annotation, read_img, read_msk, projectPoints
 
 
 class FreiHandDataset(Dataset):
-    """Face Landmarks dataset."""
-
     def __init__(self, base_path, version, transform=None):
         """
         Args:

@@ -84,5 +84,6 @@ img = img[0].transpose((1, 2, 0))
 
 fig, ax = plt.subplots()
 ax.imshow(img)
+print(img.shape)
 plot_hand(ax, uv, order='uv')
 plt.show()
