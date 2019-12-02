@@ -1,7 +1,7 @@
 import cv2
 
 from configs.config_u0 import CONFIG_U0
-from clustering.frames_generator import FramesGenerator
+from analysis.frames_generator import FramesGenerator
 from utils.utils import to_numpy, plot_hand
 import matplotlib.pyplot as plt
 
@@ -13,7 +13,7 @@ data_path = CONFIG_U0['dataset_path']
 build_mode = CONFIG_U0['build_mode']
 frames_generator = FramesGenerator(data_path, build_mode)
 
-oredered_sequence = frames_generator.order_frames('xyz', 2345, 100)
+oredered_sequence = frames_generator.order_frames('xyz', 2345, 340)
 
 build_id = CONFIG_M0['build_id']
 
@@ -27,7 +27,7 @@ xyz_array = frames_generator.get_xyz_array()
 K_array = frames_generator.get_K_array()
 uv_array = frames_generator.get_uv_array(xyz_array, K_array)
 
-for idx in oredered_sequence[:100]:
+for idx in oredered_sequence:
     # uv_21x2 = np.array(uv_list).reshape(32560, 21, 2)
     img_tensor = dataset[idx]['img']
     img_np = to_numpy(img_tensor).transpose((1, 2, 0))

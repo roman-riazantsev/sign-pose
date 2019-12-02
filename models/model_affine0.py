@@ -25,8 +25,7 @@ class ModelAffine0:
         if save_exists:
             checkpoint = torch.load(self.save_path)
 
-        # self.parameter_names = ['rx', 'ry', 'rz', 'scale', 'tx_0', 'ty_0', 'tz_0', 'tx_1', 'ty_1', 'tz_1']
-        self.parameter_names = ['scale', 'tx_1', 'ty_1', 'tz_1']
+        self.parameter_names = ['sx', 'tx_1', 'ty_1', 'tz_1']
         self.parameters = []
 
         for p_name in self.parameter_names:

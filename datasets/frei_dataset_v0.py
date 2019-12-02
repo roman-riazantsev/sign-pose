@@ -53,7 +53,7 @@ class FreiHandVideoDataset(Dataset):
             'shapes': shapes[0],
             'uv_root': uv_root[0],
             'scale': scale[0],
-            'xyz': xyz,
+            'xyz': xyz.flatten(),
             'mano': mano,
             'K': K
         }
