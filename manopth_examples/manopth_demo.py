@@ -87,5 +87,4 @@ if __name__ == '__main__':
         display_hand({
             'verts': verts,
             'joints': joints
-        },
-                     mano_faces=layer.th_faces)
+        }, mano_faces=layer.th_faces)

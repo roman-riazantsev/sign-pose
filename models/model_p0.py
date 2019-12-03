@@ -3,9 +3,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-class Network1(nn.Module):
+class ModelP0(nn.Module):
     def __init__(self):
-        super(Network1, self).__init__()
+        super(ModelP0, self).__init__()
         self.fc1 = nn.Linear(42, 64)
         self.fc2 = nn.Linear(64, 64)
         self.fc3 = nn.Linear(64, 64)

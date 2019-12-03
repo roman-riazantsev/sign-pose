@@ -62,7 +62,7 @@ class ManoLayer(Module):
         elif side == 'left':
             self.mano_path = mano_root + '/MANO_LEFT.pkl'
 
-        print("PATH: ", self.mano_path)
+        # print("PATH: ", self.mano_path)
 
         smpl_data = ready_arguments(self.mano_path)
 

@@ -7,14 +7,15 @@ from torch.utils.tensorboard import SummaryWriter
 from manopth.manolayer import ManoLayer
 
 
-class Trainer(object):
-    def __init__(self, batch_size, dataloader, model, save_path):
+class TrainerP0(object):
+    def __init__(self, batch_size, dataloader, model, build_id):
         self.batch_size = batch_size
         self.dataloader = dataloader
         self.model = model
-        self.save_path = save_path
 
-        self.writer = SummaryWriter('results/network_5')
+        self.save_path = f'results/{build_id}.pt'
+
+        self.writer = SummaryWriter(f'results/{build_id}')
         input_example = next(iter(dataloader))['uv']
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
