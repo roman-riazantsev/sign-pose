@@ -8,12 +8,12 @@ from .unet_parts import *
 
 
 class ModelU0(nn.Module):
-    def __init__(self, bilinear=True):
+    def __init__(self, input_depth, bilinear=True):
         super(ModelU0, self).__init__()
 
         self.bilinear = bilinear
 
-        self.inc = DoubleConv(3, 64)
+        self.inc = DoubleConv(input_depth, 64)
         self.down1 = Down(64, 128)
         self.down2 = Down(128, 256)
         self.down3 = Down(256, 512)
@@ -35,4 +35,4 @@ class ModelU0(nn.Module):
         x = self.up3(x, x2)
         x = self.up4(x, x1)
         x = self.outc(x)
-        return F.softmax(x, dim=1)
+        return [torch.softmax(x, dim=1)]

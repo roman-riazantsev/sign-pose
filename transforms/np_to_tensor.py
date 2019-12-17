@@ -23,7 +23,7 @@ class NpToTensor(object):
     @staticmethod
     def map_dict(dictionary, transform):
         for k, v in dictionary.items():
-            if k in ['X', 'img', 'y_2d']:
+            if len(v.shape) == 3:
                 v = v.transpose((2, 0, 1))
             dictionary[k] = transform(v)
         return dictionary

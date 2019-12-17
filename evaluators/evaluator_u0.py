@@ -8,7 +8,8 @@ from configs.config_u0 import CONFIG_U0
 from datasets.frei_dataset_u0 import FreiHandDataset
 from models.model_u0 import ModelU0
 from transforms.to_tensor_u0 import ToTensor
-from utils.utils import to_numpy, plot_hand
+from utils.fh_utils import plot_hand
+from utils.utils import to_numpy
 
 build_id = CONFIG_U0['build_id']
 
