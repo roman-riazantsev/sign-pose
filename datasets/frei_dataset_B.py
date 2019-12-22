@@ -3,65 +3,54 @@ from __future__ import print_function, division
 import os
 import random
 from collections import Iterable
-import skimage.io as io
 
 import cv2
 import torch
 import numpy as np
-from skimage import color
-from skimage.transform import resize
 from torch.utils.data import Dataset
 
 from utils.fh_utils import load_db_annotation, read_img, read_msk, projectPoints, split_theta, sample_version, json_load
 
 
-class SynthDatasetS1(Dataset):
-    def __init__(self, config, transform=None, is_vid=False):
+class FreiDatasetB(Dataset):
+    def __init__(self, config, excluded_indices=None, transform=None, is_vid=False):
         self.__dict__.update(config)
         self.is_vid = is_vid
+        self.db_data_anno = load_db_annotation(self.dataset_path, self.subset_name)
         self.transform = transform
-
-        xyz_uv_path = '/'.join([self.dataset_path, 'xyz_uv.npz'])
-        xyz_uv = np.load(xyz_uv_path)
-
-        self.rgb_paths = self.get_rgb_paths(self.dataset_path)
-        self.xyz_array = xyz_uv['arr_0'].reshape(-1, 63)
+        self.xyz_array = self.get_xyz_array()
         self.xyz_dict = self.array_to_dict(self.xyz_array)
-
-        self.uv_array = xyz_uv['arr_1']
+        self.xyz_dict = self.remove_keys(self.xyz_dict, excluded_indices)
 
     def __len__(self):
-        return len(self.xyz_array)
+        return len(self.db_data_anno)
 
     def get_sample(self, idx):
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
-        img = self.load_img(idx)
-        padded_img = np.zeros([640, 640, 3])
-        padded_img[81:561] = img
+        if self.background_name == 'random':
+            background_name = random.choice(['gs', 'hom', 'sample', 'auto'])
+            background_type = getattr(sample_version, background_name)
+            img = read_img(idx, self.dataset_path, self.subset_name, background_type)
+        else:
+            background_type = getattr(sample_version, self.background_name)
+            img = read_img(idx, self.dataset_path, self.subset_name, background_type)
 
-        image_resized = resize(padded_img, (224, 224), anti_aliasing=True)
-
-        uv = self.uv_array[idx].copy()
-        uv = self.pad_and_resize_uv(uv)
+        K, _, xyz = self.db_data_anno[idx]
+        K, xyz = [np.array(x) for x in [K, xyz]]
+        uv = projectPoints(xyz, K)
+        depth = self.get_depth_info(xyz)
 
         uv_maps = self.get_uv_maps(uv)
 
         sample = {
-            'img': image_resized,
-            'uv': uv,
-            'uv_maps': uv_maps
+            'img': img,
+            'uv_maps': uv_maps,
+            'depth': depth
         }
 
         return sample
-
-    def load_img(self, idx):
-        img_rgb_path = self.rgb_paths[idx]
-        img = io.imread(img_rgb_path)
-        img = color.rgba2rgb(img)
-        # img = img / 255.
-        return img
 
     def __getitem__(self, idx):
         frame_0 = self.get_sample(idx)
@@ -70,19 +59,22 @@ class SynthDatasetS1(Dataset):
             frame_1 = self.get_sample(frame_1_idx)
 
             sample = {}
-            f0i, f0uv, f1i = frame_0['img'], frame_0['uv_maps'], frame_1['img']
-            sample['X'] = np.concatenate([f0i, f0uv, f1i], axis=2)
-            sample['uv_maps'] = frame_1['uv_maps']
-            sample['uv'] = frame_1['uv']
+            f0i, f0uv, f1i, f1uv = frame_0['img'], frame_0['uv_maps'], frame_1['img'], frame_1['uv_maps']
+            sample['X'] = np.concatenate([f0i, f0uv, f1i, f1uv], axis=2)
+            sample['prev_depth'] = frame_0['depth']
+            sample['Y'] = frame_1['depth']
             output = sample
         else:
-            frame_0['X'] = frame_0['img']
-            output = frame_0
+            sample = {}
+            f0i, f0uv = frame_0['img'], frame_0['uv_maps']
+            sample['X'] = np.concatenate([f0i, f0uv], axis=2)
+            sample['Y'] = frame_0['depth']
+            output = sample
 
         if self.transform:
-            output = self.transform(output)
+            sample = self.transform(output)
 
-        return output
+        return sample
 
     def get_idx_of_frame_1(self, frame_0_idx):
         reference_xyz = self.xyz_array[frame_0_idx]
@@ -123,6 +115,12 @@ class SynthDatasetS1(Dataset):
 
         return uv_maps
 
+    def get_xyz_array(self):
+        xyz_path = os.path.join(self.dataset_path, '%s_xyz.json' % 'training')
+        xyz_list = json_load(xyz_path)
+        xyz_array = np.array(xyz_list).reshape(32560, 63)
+        return xyz_array
+
     @staticmethod
     def array_to_dict(arr):
         key_val_pairs = enumerate(arr)
@@ -141,19 +139,10 @@ class SynthDatasetS1(Dataset):
         return dict_copy
 
     @staticmethod
-    def get_rgb_paths(base_path):
-        rgb_paths = []
-        for filename in os.listdir(base_path):
-            if filename.endswith("_color.png"):
-                full_path = '/'.join([base_path, filename])
-                rgb_paths.append(full_path)
-
-        rgb_paths.sort()
-        return rgb_paths
-
-    @staticmethod
-    def pad_and_resize_uv(uv):
-        uv[:, 1] += 80.
-        uv[:, 0] *= 224. / 640.
-        uv[:, 1] *= 224. / 640.
-        return uv
+    def get_depth_info(xyz):
+        depth = xyz[..., 2].copy()
+        depth = (depth - depth.min())
+        max_depth = depth.max()
+        depth_normed = depth / max_depth
+        depth_info = np.append(depth_normed, max_depth)
+        return depth_info

@@ -21,6 +21,7 @@ if __name__ == '__main__':
         batch_size=CONFIG_M0['batch_size'],
         shuffle=True
     )
+
     model = ModelM0()
     trainer = TrainerM0(CONFIG_M0['batch_size'], dataloader, model, build_id, CONFIG_M0['save_rate'])
     trainer.train(epochs=10000)
